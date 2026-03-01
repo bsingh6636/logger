@@ -23,6 +23,11 @@ export const columns: ColumnDef<ApiKey>[] = [
   {
     accessorKey: "createdAt",
     header: "Created At",
+    cell: ({ getValue }) => {
+      const value = getValue() as string
+      const date = new Date(value)
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString()
+    },
   },
   {
     id: "actions",

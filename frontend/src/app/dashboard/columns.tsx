@@ -16,6 +16,11 @@ export const columns: ColumnDef<Log>[] = [
   {
     accessorKey: "timestamp",
     header: "Timestamp",
+    cell: ({ getValue }) => {
+      const value = getValue() as string
+      const date = new Date(value)
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString()
+    },
   },
   {
     accessorKey: "level",

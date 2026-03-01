@@ -1,29 +1,38 @@
 import { NextResponse } from 'next/server';
 
+const backendBaseUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+
 export async function GET(req: Request) {
-  // In a real application, you would fetch logs from a database.
-  // For now, we'll return some dummy data.
+  try {
+    const authHeader = req.headers.get('authorization') || '';
+    const url = new URL(req.url);
+    const res = await fetch(`${backendBaseUrl}/api/logs?${url.searchParams.toString()}`, {
+      headers: { Authorization: authHeader },
+    });
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (error) {
+    console.error('Fetch logs error:', error);
+    return NextResponse.json({ error: 'An error occurred while fetching logs' }, { status: 500 });
+  }
+}
 
-  const dummyLogs = [
-    {
-      id: '1',
-      level: 'info',
-      message: 'This is an informational log message.',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      level: 'warn',
-      message: 'This is a warning log message.',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      level: 'error',
-      message: 'This is an error log message.',
-      timestamp: new Date().toISOString(),
-    },
-  ];
-
-  return NextResponse.json(dummyLogs, { status: 200 });
+export async function POST(req: Request) {
+  try {
+    const apiKey = req.headers.get('x-api-key') || '';
+    const body = await req.json();
+    const res = await fetch(`${backendBaseUrl}/api/logs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': apiKey,
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (error) {
+    console.error('Create log error:', error);
+    return NextResponse.json({ error: 'An error occurred while creating the log' }, { status: 500 });
+  }
 }
